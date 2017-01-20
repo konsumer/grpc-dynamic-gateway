@@ -1,0 +1,38 @@
+{
+  "name": "grpc-dynamic-gateway",
+  "version": "0.0.1",
+  "description": "Like grpc-gateway, but written in node and dynamic.",
+  "main": "index.js",
+  "bin": {
+    "grpc-dynamic-gateway": "cli.js"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/konsumer/grpc-dynamic-gateway.git"
+  },
+  "keywords": [
+    "grpc",
+    "express",
+    "rest",
+    "json",
+    "protobuf"
+  ],
+  "author": "David Konsumer <konsumer@jetboystudio.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/konsumer/grpc-dynamic-gateway/issues"
+  },
+  "homepage": "https://github.com/konsumer/grpc-dynamic-gateway#readme",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "express": "^4.14.0",
+    "grpc": "^1.0.1",
+    "yargs": "^6.6.0"
+  },
+  "devDependencies": {
+    "jest": "^18.1.0"
+  }
+}
