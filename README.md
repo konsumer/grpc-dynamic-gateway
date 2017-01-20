@@ -34,7 +34,12 @@ const bodyParser = require('body-parser')
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+
+// load the actual proxy
 app.use(grpcGateway('api.proto', '0.0.0.0:5050'))
+
+// optional: provide /swagger.json
+app.use(grpcGateway.swagger('api.proto'))
 
 const port = process.env.PORT || 8080
 
