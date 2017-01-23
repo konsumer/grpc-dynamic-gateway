@@ -63,4 +63,4 @@ So to run it, try this:
 docker run -v $(pwd)/your.proto:/api.proto -p 8080:8080 -e "GRPC_HOST=0.0.0.0:5050" -rm -it konsumer/grpc-dynamic-gateway
 ```
 
-If you want to do something different, the exposed `CMD` is the same as `grpc-dynamic-gateway`.
+If you want to do something different, the exposed `CMD` is the same as `grpc-dynamic-gateway` CLI, above.
