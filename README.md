@@ -60,7 +60,7 @@ There is also a required environment variable: `GRPC_HOST` which should resolve 
 So to run it, try this:
 
 ```
-docker run -v $(pwd)/your.proto:/api.proto -p 5050:5050 -e "GRPC_HOST=0.0.0.0:5050" -rm -it konsumer/grpc-dynamic-gateway
+docker run -v $(pwd)/your.proto:/api.proto -p 8080:8080 -e "GRPC_HOST=0.0.0.0:5050" -rm -it konsumer/grpc-dynamic-gateway
 ```
 
 If you want to do something different, the exposed `CMD` is the same as `grpc-dynamic-gateway`.
