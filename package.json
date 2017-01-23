@@ -6,9 +6,6 @@
   "bin": {
     "grpc-dynamic-gateway": "cli.js"
   },
-  "scripts": {
-    "test": "jest"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/konsumer/grpc-dynamic-gateway.git"
@@ -31,8 +28,5 @@
     "express": "^4.14.0",
     "grpc": "^1.0.1",
     "yargs": "^6.6.0"
-  },
-  "devDependencies": {
-    "jest": "^18.1.0"
   }
 }
