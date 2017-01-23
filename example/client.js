@@ -8,7 +8,7 @@ if (process.argv.length < 5) {
   process.exit(1)
 }
 
-const protoFile = `${__dirname}/api.proto`
+const protoFile = process.argv[2]
 const host = process.argv[3]
 const ns = process.argv[4].split('.')
 const pkg = ns[0]
