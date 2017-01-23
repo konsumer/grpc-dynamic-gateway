@@ -8,6 +8,7 @@ module.exports = (proto, grpc) => {
   if (!proto) throw new Error('proto is required')
   if (!grpc) throw new Error('grpc is required')
   return (req, res, next) => {
+    // TODO: forward protobuf request to grpc server
   }
 }
 
@@ -22,7 +23,7 @@ module.exports.swagger = (proto) => {
     proto = [proto]
   }
   const swagger = {}
-  // TODO: build swagger
+  // TODO: build swagger from proto array
   const sw = JSON.stringify(swagger, null, 2)
   return (req, res, next) => {
     if (req.method === 'GET' && req.path === '/swagger.json') {
