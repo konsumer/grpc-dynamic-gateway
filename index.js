@@ -1,26 +1,90 @@
+const grpc = require('grpc')
+
+// TODO: build an express router instead of this middleware
+// to handle "/v1/messages/{message_id}"
+// https://expressjs.com/en/guide/routing.html#express-router
+// https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
+// url.replace(/{(.+)}/, ':$1')
 /**
- * generate middleware to handle proto
- * @param  {String} proto Filename of protobuf-file
- * @param  {String} grpc  HOST:PORT of grpc server
- * @return {Function}     Middleware
+ * generate middleware to handle proto files
+ * @param  {[String]} protoFiles Filenames of protobuf-file
+ * @param  {String} grpcLocation HOST:PORT of gRPC server
+ * @return {Function}            Middleware
  */
-module.exports = (proto, grpc) => {
-  if (!proto) throw new Error('proto is required')
-  if (!grpc) throw new Error('grpc is required')
+module.exports = (protoFiles, grpcLocation) => {
+  if (!protoFiles) throw new Error('protoFiles is required')
+  if (!grpcLocation) throw new Error('grpcLocation is required')
+  if (typeof protoFiles !== 'object') {
+    protoFiles = [protoFiles]
+  }
+  const {restmap, clients} = generateMaps(protoFiles, grpcLocation)
   return (req, res, next) => {
-    // TODO: forward protobuf request to grpc server
+    // TODO: errors for this point not being found or bad validation for input
+    if (typeof restmap[req.method][req.path] !== 'undefined') {
+      const r = restmap[req.method][req.path]
+      if (typeof clients[r.pkg][r.svc][r.method] !== 'undefined') {
+        clients[r.pkg][r.svc][r.method](bodyMap(req.body, r.body), (err, out) => {
+          // TODO: proper err-mapping
+          if (err) { return next(err) }
+        })
+      }
+    }
   }
 }
 
+// dummy function that only works properly for '*' body
+function bodyMap (body, map) {
+  return body
+}
+
 /**
- * GET /swagger.json middleware for protobuf
- * @param  {String/Array} proto Filename of protobuf-file
- * @return {Function}     Middleware
+ * Generate mapping from protofiles to REST and gRPC clients
+ * @param  {[String]} protoFiles Filenames of protobuf-file
+ * @param  {String} grpcLocation HOST:PORT of gRPC server
+ * @return {Object}              {clients, restmap}
  */
-module.exports.swagger = (proto) => {
-  if (!proto) throw new Error('proto is required')
-  if (typeof proto !== 'object') {
-    proto = [proto]
+function generateMaps (protoFiles, grpcLocation) {
+  const clients = {}
+  const restmap = {get: {}, put: {}, post: {}, delete: {}, patch: {}}
+  protoFiles.forEach(p => {
+    const proto = grpc.load(p)
+    Object.keys(proto).forEach(pkg => {
+      clients[pkg] = clients[pkg] || {}
+      Object.keys(proto[pkg]).forEach(svc => {
+        if (proto[pkg][svc].service) {
+          clients[pkg][svc] = new proto[pkg][svc](grpcLocation, grpc.credentials.createInsecure())
+          proto[pkg][svc].service.children
+            .filter(child => child.className === 'Service.RPCMethod' && child.options)
+            .map(child => ({options: child.options, name: child.name}))
+            .forEach(child => {
+              Object.keys(restmap).forEach(method => {
+                if (child.options['(google.api.http).' + method]) {
+                  restmap[method][ child.options['(google.api.http).' + method] ] = {
+                    body: child.options['(google.api.http).body'],
+                    pkg,
+                    svc,
+                    method: child.name
+                  }
+                }
+              })
+            })
+        }
+      })
+    })
+  })
+  return {clients, restmap}
+}
+module.exports.generateMaps = generateMaps
+
+/**
+ * GET /swagger.json middleware for proto files
+ * @param  {[String]} protoFiles Filenames of protobuf-file
+ * @return {Function} Middleware
+ */
+module.exports.swagger = (protoFiles) => {
+  if (!protoFiles) throw new Error('protoFiles is required')
+  if (typeof protoFiles !== 'object') {
+    protoFiles = [protoFiles]
   }
   const swagger = {}
   // TODO: build swagger from proto array

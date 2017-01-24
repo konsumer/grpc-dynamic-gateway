@@ -28,9 +28,7 @@ if (!argv._.length) {
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-argv._.forEach(proto => {
-  app.use(grpcGateway(proto, argv.grpc))
-})
+app.use(grpcGateway(argv._, argv.grpc))
 app.use(grpcGateway.swagger(argv._))
 app.listen(argv.port, () => {
   console.log(`Listening on http://0.0.0.0:${argv.port}`)

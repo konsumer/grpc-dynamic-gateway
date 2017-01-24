@@ -4,10 +4,20 @@ package helloworld;
 // The greeting service definition.
 service Greeter {
   // Sends a greeting
-  rpc sayHello (GreeterRequest) returns (GreeterReply) {}
+  rpc sayHello (GreeterRequest) returns (GreeterReply) {
+    option (google.api.http) = {
+      post: "/v1/hi"
+      body: "*"
+    };
+  }
 
   // Sends a farewell
-  rpc sayGoodbye (GreeterRequest) returns (GreeterReply) {}
+  rpc sayGoodbye (GreeterRequest) returns (GreeterReply) {
+    option (google.api.http) = {
+      post: "/v1/bye"
+      body: "*"
+    };
+  }
 }
 
 // The request message containing the user's name.

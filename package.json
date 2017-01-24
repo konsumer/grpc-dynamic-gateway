@@ -13,6 +13,8 @@
   "keywords": [
     "grpc",
     "express",
+    "middleware",
+    "swagger",
     "rest",
     "json",
     "protobuf"
