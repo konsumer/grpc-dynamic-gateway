@@ -1,6 +1,9 @@
 syntax = "proto3";
 package helloworld;
 
+// intentionally left out to prevent missing dependency
+// import "google/api/annotations.proto";
+
 // The greeting service definition.
 service Greeter {
   // Sends a greeting

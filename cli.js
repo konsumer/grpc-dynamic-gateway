@@ -14,9 +14,18 @@ const argv = yargs.usage('Usage: $0 [options] DEFINITION.proto [DEFINITION2.prot
   .describe('port', 'The port to serve your JSON proxy on')
   .alias('port', 'p')
 
-  .default('grpc', process.env.GRPC_HOST || '0.0.0.0:5050')
+  .default('grpc', process.env.GRPC_HOST || '0.0.0.0:5051')
   .describe('grpc', 'The host & port to connect to, where your gprc-server is running')
   .alias('grpc', 'g')
+
+  .boolean('no-swagger')
+  .describe('no-swagger', 'Disable swagger generation')
+  .default('no-swagger', false)
+  .alias('no-swagger', 's')
+
+  .default('mountpoint', '/')
+  .describe('mountpoint', 'URL to mount server on')
+  .alias('mountpoint', 'm')
 
   .argv
 
@@ -28,8 +37,10 @@ if (!argv._.length) {
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(grpcGateway(argv._, argv.grpc))
-app.use(grpcGateway.swagger(argv._))
+app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc))
+if (!argv.noSwagger) {
+  app.use(argv.mountpoint, grpcGateway.swagger(argv._))
+}
 app.listen(argv.port, () => {
   console.log(`Listening on http://0.0.0.0:${argv.port}`)
 })

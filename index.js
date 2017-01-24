@@ -1,72 +1,42 @@
 const grpc = require('grpc')
+const express = require('express')
 
-// TODO: build an express router instead of this middleware
-// to handle "/v1/messages/{message_id}"
-// https://expressjs.com/en/guide/routing.html#express-router
-// https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
-// url.replace(/{(.+)}/, ':$1')
-// bonus: actually parse the types of fields for correct regex of URL matching
-//   (\w+) -> string, (\d+) for number
+const supportedMethods = ['get', 'put', 'post', 'delete', 'patch'] // supported HTTP methods
+const paramRegex = /{(\w+)}/g // regex to find gRPC params in url
+
+const clients = {}
+
 /**
- * generate middleware to handle proto files
- * @param  {[String]} protoFiles Filenames of protobuf-file
- * @param  {String} grpcLocation HOST:PORT of gRPC server
+ * generate middleware to proxy to gRPC defined by proto files
+ * @param  {string[]} protoFiles Filenames of protobuf-file
+ * @param  {string} grpcLocation HOST:PORT of gRPC server
+ * @param  {ChannelCredentials}  gRPC credential context (default: grpc.credentials.createInsecure())
  * @return {Function}            Middleware
  */
-module.exports = (protoFiles, grpcLocation) => {
-  if (!protoFiles) throw new Error('protoFiles is required')
-  if (!grpcLocation) throw new Error('grpcLocation is required')
-  if (typeof protoFiles !== 'object') {
-    protoFiles = [protoFiles]
-  }
-  const {restmap, clients} = generateMaps(protoFiles, grpcLocation)
-  return (req, res, next) => {
-    // TODO: errors for this point not being found or bad validation for input
-    if (typeof restmap[req.method][req.path] !== 'undefined') {
-      const r = restmap[req.method][req.path]
-      if (typeof clients[r.pkg][r.svc][r.method] !== 'undefined') {
-        clients[r.pkg][r.svc][r.method](bodyMap(req.body, r.body), (err, out) => {
-          // TODO: proper err-mapping
-          if (err) { return next(err) }
-        })
-      }
-    }
-  }
-}
-
-// dummy function that only works properly for '*' body
-function bodyMap (body, map) {
-  return body
-}
-
-/**
- * Generate mapping from protofiles to REST and gRPC clients
- * @param  {[String]} protoFiles Filenames of protobuf-file
- * @param  {String} grpcLocation HOST:PORT of gRPC server
- * @return {Object}              {clients, restmap}
- */
-function generateMaps (protoFiles, grpcLocation) {
-  const clients = {}
-  const restmap = {get: {}, put: {}, post: {}, delete: {}, patch: {}}
+const middleware = (protoFiles, grpcLocation, credentials = grpc.credentials.createInsecure()) => {
+  const router = express.Router()
   protoFiles.forEach(p => {
     const proto = grpc.load(p)
     Object.keys(proto).forEach(pkg => {
       clients[pkg] = clients[pkg] || {}
       Object.keys(proto[pkg]).forEach(svc => {
-        if (proto[pkg][svc].service) {
-          clients[pkg][svc] = new proto[pkg][svc](grpcLocation, grpc.credentials.createInsecure())
+        clients[pkg][svc] = new proto[pkg][svc](grpcLocation, credentials)
+        if (proto[pkg][svc].service && proto[pkg][svc].service.children.length) {
           proto[pkg][svc].service.children
             .filter(child => child.className === 'Service.RPCMethod' && child.options)
-            .map(child => ({options: child.options, name: child.name}))
             .forEach(child => {
-              Object.keys(restmap).forEach(method => {
-                if (child.options['(google.api.http).' + method]) {
-                  restmap[method][ child.options['(google.api.http).' + method] ] = {
-                    body: child.options['(google.api.http).body'],
-                    pkg,
-                    svc,
-                    method: child.name
-                  }
+              // TODO: handle child.options.additional_bindings
+              supportedMethods.forEach(httpMethod => {
+                if (typeof child.options[`(google.api.http).${httpMethod}`] !== 'undefined') {
+                  router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
+                    clients[pkg][svc][child.name](convertParams(req, child.options[`(google.api.http).${httpMethod}`]), (err, ans) => {
+                      // TODO: improve error-handling
+                      if (err) {
+                        return res.status(500).send(err)
+                      }
+                      res.send(convertBody(ans, child.options['(google.api.http).body'], child.options[`(google.api.http).${httpMethod}`]))
+                    })
+                  })
                 }
               })
             })
@@ -74,26 +44,97 @@ function generateMaps (protoFiles, grpcLocation) {
       })
     })
   })
-  return {clients, restmap}
+  return router
 }
-module.exports.generateMaps = generateMaps
 
 /**
- * GET /swagger.json middleware for proto files
- * @param  {[String]} protoFiles Filenames of protobuf-file
+ * Swagger middleware to describe proto files
+ * @param  {string[]} protoFiles Filenames of protobuf-file
  * @return {Function} Middleware
  */
-module.exports.swagger = (protoFiles) => {
+const swaggerMiddleware = (protoFiles) => {
   if (!protoFiles) throw new Error('protoFiles is required')
   if (typeof protoFiles !== 'object') {
     protoFiles = [protoFiles]
   }
-  const swagger = {}
-  // TODO: build swagger from proto array
+  const swagger = generateSwagger(protoFiles)
   const sw = JSON.stringify(swagger, null, 2)
-  return (req, res, next) => {
-    if (req.method === 'GET' && req.path === '/swagger.json') {
-      res.send(sw)
-    }
+  const router = express.Router()
+  router.get('/swagger.json', (req, res) => res.json(sw))
+  return router
+}
+
+/**
+ * Generate swagger definition from proto files
+ * @param  {string[]} protoFiles Filenames of protobuf-file
+ * @return {Object} Swagger description
+ */
+const generateSwagger = (protoFiles) => {
+  const out = {}
+  // TODO: generate swagger definition
+  return out
+}
+
+/**
+ * Parse express request into params for grpc client
+ * @param  {Request} req Express request object
+ * @param  {string} url  gRPC url field (ie "/v1/hi/{name}")
+ * @return {Object}      params for gRPC client
+ */
+const convertParams = (req, url) => {
+  const gparams = getParamsList(url)
+  const out = req.body
+  gparams.forEach(p => { out[p] = req.params[p] })
+  return out
+}
+
+/**
+ * Convert gRPC URL expression into express
+ * @param  {string} url gRPC URL expression
+ * @return {string}     express URL expression
+ */
+const convertUrl = (url) => (
+  // TODO: use types to generate regex for numbers & strings in params
+  url.replace(paramRegex, ':$1')
+)
+
+/**
+ * Convert gRPC response to output, based on gRPC body field
+ * @param  {Object} value   gRPC response object
+ * @param  {string} bodyMap gRPC body field
+ * @return {mixed}          mapped output for `res.send()`
+ */
+const convertBody = (value, bodyMap) => {
+  bodyMap = bodyMap || '*'
+  if (bodyMap === '*') {
+    return value
+  } else {
+    return value[bodyMap]
   }
 }
+
+/**
+ * Get a list of params from a gRPC URL
+ * @param  {string} url gRPC URL
+ * @return {string[]}   Array of params
+ */
+const getParamsList = (url) => {
+  const out = []
+  let m
+  while ((m = paramRegex.exec(url)) !== null) {
+    if (m.index === paramRegex.lastIndex) {
+      paramRegex.lastIndex++
+    }
+    out.push(m[1])
+  }
+  return out
+}
+
+// interface
+module.exports = middleware
+module.exports.swagger = swaggerMiddleware
+module.exports.generateSwagger = generateSwagger
+module.exports.convertParams = convertParams
+module.exports.convertUrl = convertUrl
+module.exports.convertBody = convertBody
+module.exports.getParamsList = getParamsList
