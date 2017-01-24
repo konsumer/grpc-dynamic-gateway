@@ -5,6 +5,8 @@ const grpc = require('grpc')
 // https://expressjs.com/en/guide/routing.html#express-router
 // https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
 // url.replace(/{(.+)}/, ':$1')
+// bonus: actually parse the types of fields for correct regex of URL matching
+//   (\w+) -> string, (\d+) for number
 /**
  * generate middleware to handle proto files
  * @param  {[String]} protoFiles Filenames of protobuf-file
