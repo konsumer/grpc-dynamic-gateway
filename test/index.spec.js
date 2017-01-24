@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-const {generateSwagger, convertParams, convertUrl, convertBody, getParamsList} = require('..')
+const { generateSwagger, convertParams, convertUrl, convertBody, getParamsList } = require('..')
 
 describe('gRPC Dynamic Gateway', () => {
   describe('generateSwagger()', () => {
