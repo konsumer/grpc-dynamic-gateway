@@ -39,7 +39,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc))
 if (!argv.noSwagger) {
-  app.use(argv.mountpoint, grpcGateway.swagger(argv._))
+  app.get(`${argv.mountpoint}/swagger.json`, grpcGateway.swagger(argv._))
 }
 app.listen(argv.port, () => {
   console.log(`Listening on http://0.0.0.0:${argv.port}`)

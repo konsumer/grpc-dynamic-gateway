@@ -57,11 +57,8 @@ const swaggerMiddleware = (protoFiles) => {
   if (typeof protoFiles !== 'object') {
     protoFiles = [protoFiles]
   }
-  const swagger = generateSwagger(protoFiles)
-  const sw = JSON.stringify(swagger, null, 2)
-  const router = express.Router()
-  router.get('/swagger.json', (req, res) => res.json(sw))
-  return router
+  const sw = JSON.stringify(generateSwagger(protoFiles), null, 2)
+  return (res, req) => res.json(sw)
 }
 
 /**
