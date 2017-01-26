@@ -25,12 +25,12 @@ const middleware = (protoFiles, grpcLocation, credentials = grpc.credentials.cre
           proto[pkg][svc].service.children
             .filter(child => child.className === 'Service.RPCMethod' && child.options)
             .forEach(child => {
-              // TODO: handle child.options.additional_bindings
+              // TODO: PRIORITY:LOW - handle child.options.additional_bindings
               supportedMethods.forEach(httpMethod => {
                 if (typeof child.options[`(google.api.http).${httpMethod}`] !== 'undefined') {
                   router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
                     clients[pkg][svc][child.name](convertParams(req, child.options[`(google.api.http).${httpMethod}`]), (err, ans) => {
-                      // TODO: improve error-handling
+                      // TODO: PRIORITY:MEDIUM - improve error-handling
                       if (err) {
                         return res.status(500).send(err)
                       }
@@ -68,7 +68,7 @@ const swaggerMiddleware = (protoFiles) => {
  */
 const generateSwagger = (protoFiles) => {
   const out = {}
-  // TODO: generate swagger definition
+  // TODO: PRIORITY:HI - generate swagger definition
   return out
 }
 
@@ -91,7 +91,7 @@ const convertParams = (req, url) => {
  * @return {string}     express URL expression
  */
 const convertUrl = (url) => (
-  // TODO: use types to generate regex for numbers & strings in params
+  // TODO: PRIORITY:LOW - use types to generate regex for numbers & strings in params
   url.replace(paramRegex, ':$1')
 )
 
