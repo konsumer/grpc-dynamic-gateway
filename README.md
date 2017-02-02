@@ -11,14 +11,13 @@ This will allow you to provide a REST-like JSON interface for your gRPC protobuf
 # cli
 
 ```
-Usage: cli.js [options] DEFINITION.proto [DEFINITION2.proto...]
+Usage: grpc-dynamic-gateway [options] DEFINITION.proto [DEFINITION2.proto...]
 
 Options:
   -?, --help, -h    Show help                                          [boolean]
   --port, -p        The port to serve your JSON proxy on         [default: 8080]
   --grpc, -g        The host & port to connect to, where your gprc-server is
                     running                            [default: "0.0.0.0:5051"]
-  --no-swagger, -s  Disable swagger generation        [boolean] [default: false]
   --mountpoint, -m  URL to mount server on                        [default: "/"]
 ```
 
@@ -40,14 +39,19 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // load the actual proxy
 app.use(grpcGateway('api.proto', '0.0.0.0:5051'))
 
-// optional: provide /swagger.json
-app.use(grpcGateway.swagger('api.proto'))
-
 const port = process.env.PORT || 8080
 
 app.listen(port, () => {
   console.log(`Listening on http://0.0.0.0:${port}`)
 })
+```
+
+# swagger
+
+[Protoc](https://github.com/google/protobuf) can generate a swagger description of your RPC endpoints, if you have [protoc-gen-swagger](https://github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger) installed:
+
+```
+protoc data-contracts/proto/services/events.proto --swagger_out=logtostderr=true:.
 ```
 
 # docker
