@@ -51,7 +51,7 @@ app.listen(port, () => {
 [Protoc](https://github.com/google/protobuf) can generate a swagger description of your RPC endpoints, if you have [protoc-gen-swagger](https://github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger) installed:
 
 ```
-protoc data-contracts/proto/services/events.proto --swagger_out=logtostderr=true:.
+protoc DEFINITION.proto --swagger_out=logtostderr=true:.
 ```
 
 # docker
