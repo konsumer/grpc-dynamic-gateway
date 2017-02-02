@@ -31,6 +31,7 @@ const middleware = (protoFiles, grpcLocation, credentials = grpc.credentials.cre
                   router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
                     clients[pkg][svc][child.name](convertParams(req, child.options[`(google.api.http).${httpMethod}`]), (err, ans) => {
                       // TODO: PRIORITY:MEDIUM - improve error-handling
+                      // TODO: PRIORITY:HIGH - double-check JSON mapping to be same as grpc-gateway
                       if (err) {
                         return res.status(500).send(err)
                       }
@@ -45,31 +46,6 @@ const middleware = (protoFiles, grpcLocation, credentials = grpc.credentials.cre
     })
   })
   return router
-}
-
-/**
- * Swagger middleware to describe proto files
- * @param  {string[]} protoFiles Filenames of protobuf-file
- * @return {Function} Middleware
- */
-const swaggerMiddleware = (protoFiles) => {
-  if (!protoFiles) throw new Error('protoFiles is required')
-  if (typeof protoFiles !== 'object') {
-    protoFiles = [protoFiles]
-  }
-  const sw = JSON.stringify(generateSwagger(protoFiles), null, 2)
-  return (res, req) => res.json(sw)
-}
-
-/**
- * Generate swagger definition from proto files
- * @param  {string[]} protoFiles Filenames of protobuf-file
- * @return {Object} Swagger description
- */
-const generateSwagger = (protoFiles) => {
-  const out = {}
-  // TODO: PRIORITY:HI - generate swagger definition
-  return out
 }
 
 /**
@@ -129,8 +105,6 @@ const getParamsList = (url) => {
 
 // interface
 module.exports = middleware
-module.exports.swagger = swaggerMiddleware
-module.exports.generateSwagger = generateSwagger
 module.exports.convertParams = convertParams
 module.exports.convertUrl = convertUrl
 module.exports.convertBody = convertBody
