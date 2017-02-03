@@ -1,13 +1,7 @@
 /* global describe, it, expect */
-const { generateSwagger, convertParams, convertUrl, convertBody, getParamsList } = require('..')
+const { convertParams, convertUrl, convertBody, getParamsList } = require('..')
 
 describe('gRPC Dynamic Gateway', () => {
-  describe('generateSwagger()', () => {
-    it('should generate correct swagger', () => {
-      expect(generateSwagger([`${__dirname}/../example/api.proto`, `${__dirname}/test.proto`])).toMatchSnapshot()
-    })
-  })
-
   describe('convertParams()', () => {
     it('should handle /v1/hi/{name}', () => {
       const req = {

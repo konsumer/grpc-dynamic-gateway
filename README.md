@@ -36,11 +36,10 @@ const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
-// load the actual proxy
-app.use(grpcGateway('api.proto', '0.0.0.0:5051'))
+// load the proxy on / URL
+app.use('/', grpcGateway('api.proto', '0.0.0.0:5051'))
 
 const port = process.env.PORT || 8080
-
 app.listen(port, () => {
   console.log(`Listening on http://0.0.0.0:${port}`)
 })

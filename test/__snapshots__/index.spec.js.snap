@@ -18,8 +18,6 @@ exports[`gRPC Dynamic Gateway convertUrl() should correctly convert /{version}/h
 
 exports[`gRPC Dynamic Gateway convertUrl() should correctly convert /v1/hi/{name} into express URL 1`] = `"/v1/hi/:name"`;
 
-exports[`gRPC Dynamic Gateway generateSwagger() should generate correct swagger 1`] = `Object {}`;
-
 exports[`gRPC Dynamic Gateway getParamsList() should find params in /{version}/hi/{name}/{cool} 1`] = `
 Array [
   "version",
