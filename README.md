@@ -76,7 +76,7 @@ grpc-dynamic-gateway --ca=ca.crt --key=client.key --cert=client.crt api.proto
 
 You can use SSL in code, like this:
 
-```
+```js
 const grpc = require('grpc')
 const credentials = grpc.credentials.createSsl(
   fs.readFileSync(yourca),

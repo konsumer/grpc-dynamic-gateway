@@ -1,90 +1,21 @@
 syntax = "proto3";
+package helloworld;
 
 import "google/api/annotations.proto";
-import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/duration.proto";
 
-/**
- * Package of echo service/types
- */
-package echopb;
-
-enum OuterEnum {
-  OPTIONA = 0;
-  OPTIONB = 1;
-}
-
-/**
- * A message designed to stress the parser out
- */
-message StressMessage {
-  message InnerStress {
-    string id = 1;
-  }
-  enum InnerEnum {
-    OPTIONA = 0;
-    OPTIONB = 1;
-  }
-  InnerStress message = 1;
-  InnerEnum innerenum = 2;
-  OuterEnum outerenum = 3;
-  map <int32, string> map_test = 4;
-  repeated int32 repeated_int = 5;
-  bool bool = 6;
-  string string = 7;
-  bytes bytes = 8;
-  int32 num1 = 9;
-  fixed32 num2 = 10;
-  uint32 num3 = 11;
-  int64 num4 = 12;
-  fixed64 num5 = 13;
-  uint64 num6 = 14;
-  float num7 = 15;
-  double num8 = 16;
-  google.protobuf.Any any = 17;
-  google.protobuf.Timestamp timestamp = 18;
-  google.protobuf.Duration duration = 19;
-  StressMessage RussianDoll = 20;
-}
-
-/**
- * An echoed message
- */
-message EchoMessage {
-  string value = 1; 
-}
-
-/**
- * Service for echoing things
- */
-service EchoService {
-  /**
-   * Echo a message back
-   */
-  rpc Echo(EchoMessage) returns (EchoMessage) {
+service Greeter {
+  rpc sayHello (HelloRequest) returns (HelloReply) {
     option (google.api.http) = {
-      post: "/v1/echo"
+      post: "/v1/hi"
       body: "*"
     };
   }
+}
 
-  /**
-   * Test the parser with stress
-   */
-  rpc Stress(StressMessage) returns (StressMessage) {
-    option (google.api.http) = {
-      get: "/v1/stress"
-    };
-  }
+message HelloRequest {
+  string name = 1;
+}
 
-  /**
-   * Test the parser with POSTed stress
-   */
-  rpc StressPost(StressMessage) returns (StressMessage) {
-    option (google.api.http) = {
-      post: "/v1/stress/{string}",
-      body: "*"
-    };
-  }
+message HelloReply {
+  string message = 1;
 }

@@ -20,9 +20,9 @@ const argv = yargs.usage('Usage: $0 [options] DEFINITION.proto [DEFINITION2.prot
   .describe('grpc', 'The host & port to connect to, where your gprc-server is running')
   .alias('grpc', 'g')
 
-  .describe('ca', 'SSL CA cert')
-  .describe('key', 'SSL client key')
-  .describe('cert', 'SSL client certificate')
+  .describe('ca', 'SSL CA cert for gRPC')
+  .describe('key', 'SSL client key for gRPC')
+  .describe('cert', 'SSL client certificate for gRPC')
 
   .default('mountpoint', '/')
   .describe('mountpoint', 'URL to mount server on')
@@ -54,7 +54,7 @@ if (argv.ca || argv.key || argv.cert) {
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc, credentials))
+app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc, credentials, true))
 app.listen(argv.port, () => {
   console.log(`Listening on http://0.0.0.0:${argv.port}`)
 })

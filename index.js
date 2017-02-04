@@ -13,7 +13,7 @@ const clients = {}
  * @param  {ChannelCredentials}  gRPC credential context (default: grpc.credentials.createInsecure())
  * @return {Function}            Middleware
  */
-const middleware = (protoFiles, grpcLocation, credentials) => {
+const middleware = (protoFiles, grpcLocation, credentials, debug) => {
   credentials = credentials || grpc.credentials.createInsecure()
   const router = express.Router()
   protoFiles.forEach(p => {
@@ -21,16 +21,23 @@ const middleware = (protoFiles, grpcLocation, credentials) => {
     Object.keys(proto).forEach(pkg => {
       clients[pkg] = clients[pkg] || {}
       Object.keys(proto[pkg]).forEach(svc => {
-        clients[pkg][svc] = new proto[pkg][svc](grpcLocation, credentials)
         if (proto[pkg][svc].service && proto[pkg][svc].service.children.length) {
+          clients[pkg][svc] = new proto[pkg][svc](grpcLocation, credentials)
           proto[pkg][svc].service.children
             .filter(child => child.className === 'Service.RPCMethod' && child.options)
             .forEach(child => {
               // TODO: PRIORITY:LOW - handle child.options.additional_bindings
               supportedMethods.forEach(httpMethod => {
                 if (typeof child.options[`(google.api.http).${httpMethod}`] !== 'undefined') {
+                  if (debug) {
+                    console.log(httpMethod.toUpperCase(), child.options[`(google.api.http).${httpMethod}`], ':', `${pkg}.${svc}.${child.name}(${child.requestName})`, '→', child.responseName)
+                  }
                   router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
-                    clients[pkg][svc][child.name](convertParams(req, child.options[`(google.api.http).${httpMethod}`]), (err, ans) => {
+                    const params = convertParams(req, child.options[`(google.api.http).${httpMethod}`])
+                    if (debug) {
+                      console.log(`${pkg}.${svc}.${child.name}(${JSON.stringify(params)})`)
+                    }
+                    clients[pkg][svc][child.name](params, (err, ans) => {
                       // TODO: PRIORITY:MEDIUM - improve error-handling
                       // TODO: PRIORITY:HIGH - double-check JSON mapping to be same as grpc-gateway
                       if (err) {
