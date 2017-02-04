@@ -1,9 +1,11 @@
 #! /usr/bin/env node
 
+const fs = require('fs')
 const grpcGateway = require('./index.js')
 const yargs = require('yargs')
 const express = require('express')
 const bodyParser = require('body-parser')
+const grpc = require('grpc')
 
 const argv = yargs.usage('Usage: $0 [options] DEFINITION.proto [DEFINITION2.proto...]')
   .help('?')
@@ -18,6 +20,10 @@ const argv = yargs.usage('Usage: $0 [options] DEFINITION.proto [DEFINITION2.prot
   .describe('grpc', 'The host & port to connect to, where your gprc-server is running')
   .alias('grpc', 'g')
 
+  .describe('ca', 'SSL CA cert')
+  .describe('key', 'SSL client key')
+  .describe('cert', 'SSL client certificate')
+
   .default('mountpoint', '/')
   .describe('mountpoint', 'URL to mount server on')
   .alias('mountpoint', 'm')
@@ -29,10 +35,26 @@ if (!argv._.length) {
   process.exit(1)
 }
 
+let credentials
+if (argv.ca || argv.key || argv.cert) {
+  if (!(argv.ca && argv.key && argv.cert)) {
+    console.log('SSL requires --ca, --key, & --cert\n')
+    yargs.showHelp()
+    process.exit(1)
+  }
+  credentials = grpc.credentials.createSsl(
+    fs.readFileSync(argv.ca),
+    fs.readFileSync(argv.key),
+    fs.readFileSync(argv.cert)
+  )
+} else {
+  credentials = grpc.credentials.createInsecure()
+}
+
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc))
+app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc, credentials))
 app.listen(argv.port, () => {
   console.log(`Listening on http://0.0.0.0:${argv.port}`)
 })

@@ -18,6 +18,9 @@ Options:
   --port, -p        The port to serve your JSON proxy on         [default: 8080]
   --grpc, -g        The host & port to connect to, where your gprc-server is
                     running                            [default: "0.0.0.0:5051"]
+  --ca              SSL CA cert
+  --key             SSL client key
+  --cert            SSL client certificate
   --mountpoint, -m  URL to mount server on                        [default: "/"]
 ```
 
@@ -43,6 +46,44 @@ const port = process.env.PORT || 8080
 app.listen(port, () => {
   console.log(`Listening on http://0.0.0.0:${port}`)
 })
+```
+
+# ssl
+
+With SSL, you will need the Cert Authority certificate, client & server signed certificate and keys.
+
+
+I generated/signed my demo keys like this:
+
+```
+openssl genrsa -passout pass:1111 -des3 -out ca.key 4096
+openssl req -passin pass:1111 -new -x509 -days 365 -key ca.key -out ca.crt -subj  "/C=US/ST=Oregon/L=Portland/O=Test/OU=CertAuthority/CN=localhost"
+openssl genrsa -passout pass:1111 -des3 -out server.key 4096
+openssl req -passin pass:1111 -new -key server.key -out server.csr -subj  "/C=US/ST=Oregon/L=Portland/O=Test/OU=Server/CN=localhost"
+openssl x509 -req -passin pass:1111 -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+openssl rsa -passin pass:1111 -in server.key -out server.key
+openssl genrsa -passout pass:1111 -des3 -out client.key 4096
+openssl req -passin pass:1111 -new -key client.key -out client.csr -subj "/C=US/ST=Oregon/L=Portland/O=Test/OU=Client/CN=localhost"
+openssl x509 -passin pass:1111 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+openssl rsa -passin pass:1111 -in client.key -out client.key
+```
+
+Then use it like this:
+
+```
+grpc-dynamic-gateway --ca=ca.crt --key=client.key --cert=client.crt api.proto
+```
+
+You can use SSL in code, like this:
+
+```
+const grpc = require('grpc')
+const credentials = grpc.credentials.createSsl(
+  fs.readFileSync(yourca),
+  fs.readFileSync(yourkey),
+  fs.readFileSync(yourcert)
+)
+app.use('/', grpcGateway('api.proto', '0.0.0.0:5051', credentials))
 ```
 
 # swagger

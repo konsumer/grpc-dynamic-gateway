@@ -13,7 +13,8 @@ const clients = {}
  * @param  {ChannelCredentials}  gRPC credential context (default: grpc.credentials.createInsecure())
  * @return {Function}            Middleware
  */
-const middleware = (protoFiles, grpcLocation, credentials = grpc.credentials.createInsecure()) => {
+const middleware = (protoFiles, grpcLocation, credentials) => {
+  credentials = credentials || grpc.credentials.createInsecure()
   const router = express.Router()
   protoFiles.forEach(p => {
     const proto = grpc.load(p)
