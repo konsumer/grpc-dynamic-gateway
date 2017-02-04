@@ -56,5 +56,5 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc, credentials, true))
 app.listen(argv.port, () => {
-  console.log(`Listening on http://0.0.0.0:${argv.port}`)
+  console.log(`Listening on http://0.0.0.0:${argv.port}, proxying to gRPC on ${argv.grpc}`)
 })
