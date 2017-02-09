@@ -11,13 +11,14 @@ const clients = {}
  * @param  {string[]} protoFiles Filenames of protobuf-file
  * @param  {string} grpcLocation HOST:PORT of gRPC server
  * @param  {ChannelCredentials}  gRPC credential context (default: grpc.credentials.createInsecure())
+ * @param  {string} include      Path to find all includes
  * @return {Function}            Middleware
  */
-const middleware = (protoFiles, grpcLocation, credentials, debug) => {
+const middleware = (protoFiles, grpcLocation, credentials, debug, include) => {
   credentials = credentials || grpc.credentials.createInsecure()
   const router = express.Router()
   protoFiles.forEach(p => {
-    const proto = grpc.load(p)
+    const proto = include ? grpc.load({file: p, root: include}) : grpc.load(p)
     Object.keys(proto).forEach(pkg => {
       clients[pkg] = clients[pkg] || {}
       Object.keys(proto[pkg]).forEach(svc => {
