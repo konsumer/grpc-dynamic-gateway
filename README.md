@@ -18,6 +18,7 @@ Options:
   --port, -p        The port to serve your JSON proxy on         [default: 8080]
   --grpc, -g        The host & port to connect to, where your gprc-server is
                     running                            [default: "0.0.0.0:5051"]
+  -I, --include     Path to resolve imports from
   --ca              SSL CA cert
   --key             SSL client key
   --cert            SSL client certificate
