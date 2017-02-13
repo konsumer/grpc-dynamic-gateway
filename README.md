@@ -1,7 +1,5 @@
 # grpc-dynamic-gateway
 
-# (incomplete)
-
 This will allow you to provide a REST-like JSON interface for your gRPC protobuf interface. [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) requires you to genrate a static version of your interface in go, then compile it. This will allow you to run a JSON proxy for your grpc server without generating/compiling.
 
 * Install with `npm -g grpc-dynamic-gateway`

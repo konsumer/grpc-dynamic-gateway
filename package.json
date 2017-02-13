@@ -9,7 +9,8 @@
   "scripts": {
     "test": "jest --notify --coverage",
     "test:update": "npm test -- --updateSnapshot",
-    "test:watch": "npm test -- --watch"
+    "test:watch": "npm test -- --watch",
+    "release": "release-it -p -n"
   },
   "repository": {
     "type": "git",
