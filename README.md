@@ -1,7 +1,5 @@
 # grpc-dynamic-gateway
 
-# (incomplete)
-
 This will allow you to provide a REST-like JSON interface for your gRPC protobuf interface. [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) requires you to genrate a static version of your interface in go, then compile it. This will allow you to run a JSON proxy for your grpc server without generating/compiling.
 
 * Install with `npm -g grpc-dynamic-gateway`
@@ -14,10 +12,15 @@ This will allow you to provide a REST-like JSON interface for your gRPC protobuf
 Usage: grpc-dynamic-gateway [options] DEFINITION.proto [DEFINITION2.proto...]
 
 Options:
-  -?, --help, -h  Show help                                            [boolean]
-  --port, -p      The port to serve your JSON proxy on           [default: 8080]
-  --grpc, -g      The host & port to connect to, where your gprc-server is
-                  running                              [default: "0.0.0.0:5050"]
+  -?, --help, -h    Show help                                          [boolean]
+  --port, -p        The port to serve your JSON proxy on         [default: 8080]
+  --grpc, -g        The host & port to connect to, where your gprc-server is
+                    running                            [default: "0.0.0.0:5051"]
+  -I, --include     Path to resolve imports from
+  --ca              SSL CA cert
+  --key             SSL client key
+  --cert            SSL client certificate
+  --mountpoint, -m  URL to mount server on                        [default: "/"]
 ```
 
 # in code
@@ -35,17 +38,59 @@ const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
-// load the actual proxy
-app.use(grpcGateway('api.proto', '0.0.0.0:5050'))
-
-// optional: provide /swagger.json
-app.use(grpcGateway.swagger('api.proto'))
+// load the proxy on / URL
+app.use('/', grpcGateway('api.proto', '0.0.0.0:5051'))
 
 const port = process.env.PORT || 8080
-
 app.listen(port, () => {
   console.log(`Listening on http://0.0.0.0:${port}`)
 })
+```
+
+# ssl
+
+With SSL, you will need the Cert Authority certificate, client & server signed certificate and keys.
+
+
+I generated/signed my demo keys like this:
+
+```
+openssl genrsa -passout pass:1111 -des3 -out ca.key 4096
+openssl req -passin pass:1111 -new -x509 -days 365 -key ca.key -out ca.crt -subj  "/C=US/ST=Oregon/L=Portland/O=Test/OU=CertAuthority/CN=localhost"
+openssl genrsa -passout pass:1111 -des3 -out server.key 4096
+openssl req -passin pass:1111 -new -key server.key -out server.csr -subj  "/C=US/ST=Oregon/L=Portland/O=Test/OU=Server/CN=localhost"
+openssl x509 -req -passin pass:1111 -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+openssl rsa -passin pass:1111 -in server.key -out server.key
+openssl genrsa -passout pass:1111 -des3 -out client.key 4096
+openssl req -passin pass:1111 -new -key client.key -out client.csr -subj "/C=US/ST=Oregon/L=Portland/O=Test/OU=Client/CN=localhost"
+openssl x509 -passin pass:1111 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+openssl rsa -passin pass:1111 -in client.key -out client.key
+```
+
+Then use it like this:
+
+```
+grpc-dynamic-gateway --ca=ca.crt --key=client.key --cert=client.crt api.proto
+```
+
+You can use SSL in code, like this:
+
+```js
+const grpc = require('grpc')
+const credentials = grpc.credentials.createSsl(
+  fs.readFileSync(yourca),
+  fs.readFileSync(yourkey),
+  fs.readFileSync(yourcert)
+)
+app.use('/', grpcGateway('api.proto', '0.0.0.0:5051', credentials))
+```
+
+# swagger
+
+[Protoc](https://github.com/google/protobuf) can generate a swagger description of your RPC endpoints, if you have [protoc-gen-swagger](https://github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger) installed:
+
+```
+protoc DEFINITION.proto --swagger_out=logtostderr=true:.
 ```
 
 # docker
@@ -55,12 +100,12 @@ There is one required port, and a volume that will make it easier:
 - `/api.proto` - your proto file
 - `8080` - the exposed port
 
-There is also a required environment variable: `GRPC_HOST` which should resolve to your grpc sever (ie `0.0.0.0:5050`)
+There is also an optional environment variable: `GRPC_HOST` which should resolve to your grpc sever (default `0.0.0.0:5051`)
 
 So to run it, try this:
 
 ```
-docker run -v $(pwd)/your.proto:/api.proto -p 5050:5050 -e "GRPC_HOST=0.0.0.0:5050" -rm -it konsumer/grpc-dynamic-gateway
+docker run -v $(pwd)/your.proto:/api.proto -p 8080:8080 -e "GRPC_HOST=0.0.0.0:5051" -rm -it konsumer/grpc-dynamic-gateway
 ```
 
-If you want to do something different, the exposed `CMD` is the same as `grpc-dynamic-gateway`.
+If you want to do something different, the exposed `CMD` is the same as `grpc-dynamic-gateway` CLI, above.

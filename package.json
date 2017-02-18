@@ -1,13 +1,16 @@
 {
   "name": "grpc-dynamic-gateway",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Like grpc-gateway, but written in node and dynamic.",
   "main": "index.js",
   "bin": {
     "grpc-dynamic-gateway": "cli.js"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --notify --coverage",
+    "test:update": "npm test -- --updateSnapshot",
+    "test:watch": "npm test -- --watch",
+    "release": "release-it -p -n"
   },
   "repository": {
     "type": "git",
@@ -16,6 +19,8 @@
   "keywords": [
     "grpc",
     "express",
+    "middleware",
+    "swagger",
     "rest",
     "json",
     "protobuf"
@@ -33,6 +38,7 @@
     "yargs": "^6.6.0"
   },
   "devDependencies": {
-    "jest": "^18.1.0"
+    "jest": "^18.1.0",
+    "release-it": "^2.5.4"
   }
 }
