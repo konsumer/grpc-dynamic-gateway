@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-const { convertParams, convertUrl, convertBody, getParamsList } = require('..')
+const { convertParams, convertUrl, convertBody, getParamsList, convertHeaders } = require('..')
 
 describe('gRPC Dynamic Gateway', () => {
   describe('convertParams()', () => {
@@ -41,6 +41,12 @@ describe('gRPC Dynamic Gateway', () => {
     })
     it('should find params in /{version}/hi/{name}/{cool}', () => {
       expect(getParamsList('/{version}/hi/{name}/{cool}')).toMatchSnapshot()
+    })
+  })
+
+  describe('convertHeaders()', () => {
+    it('should convert a Authorize token in header to a metadata object', () => {
+      expect(convertHeaders({'Authorize': 'Bearer DUMMY_TOKEN'})).toMatchSnapshot()
     })
   })
 })
