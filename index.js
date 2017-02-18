@@ -44,7 +44,7 @@ const middleware = (protoFiles, grpcLocation, credentials, debug, include) => {
                       // TODO: PRIORITY:HIGH - double-check JSON mapping is identical to grpc-gateway
                       if (err) {
                         console.error(err)
-                        return res.status(500).send(debug ? err : 'Server Error')
+                        return res.status(err.code || 500).sendJSON(debug ? err : 'Server Error')
                       }
                       res.send(convertBody(ans, child.options['(google.api.http).body'], child.options[`(google.api.http).${httpMethod}`]))
                     })
