@@ -82,7 +82,7 @@ const credentials = grpc.credentials.createSsl(
   fs.readFileSync(yourkey),
   fs.readFileSync(yourcert)
 )
-app.use('/', grpcGateway('api.proto', '0.0.0.0:5051', credentials))
+app.use('/', grpcGateway(['api.proto'], '0.0.0.0:5051', credentials))
 ```
 
 # swagger
