@@ -35,15 +35,16 @@ const middleware = (protoFiles, grpcLocation, credentials, debug, include) => {
                   }
                   router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
                     const params = convertParams(req, child.options[`(google.api.http).${httpMethod}`])
+                    const meta = convertHeaders(req.headers)
                     if (debug) {
                       console.log(`${pkg}.${svc}.${child.name}(${JSON.stringify(params)})`)
                     }
-                    clients[pkg][svc][child.name](params, (err, ans) => {
+                    clients[pkg][svc][child.name](params, meta, (err, ans) => {
                       // TODO: PRIORITY:MEDIUM - improve error-handling
-                      // TODO: PRIORITY:HIGH - double-check JSON mapping to be same as grpc-gateway
+                      // TODO: PRIORITY:HIGH - double-check JSON mapping is identical to grpc-gateway
                       if (err) {
                         console.error(err)
-                        return res.status(500).send(debug ? err : 'Server Error')
+                        return res.status(err.code || 500).sendJSON(debug ? err : 'Server Error')
                       }
                       res.send(convertBody(ans, child.options['(google.api.http).body'], child.options[`(google.api.http).${httpMethod}`]))
                     })
@@ -113,9 +114,22 @@ const getParamsList = (url) => {
   return out
 }
 
+/**
+ * Convert headers into gRPC meta
+ * @param  {object} headers Headers: {name: value}
+ * @return {meta}           grpc meta object
+ */
+const convertHeaders = (headers) => {
+  headers = headers || {}
+  const metadata = new grpc.Metadata()
+  Object.keys(headers).forEach(h => { metadata.set(h, headers[h]) })
+  return metadata
+}
+
 // interface
 module.exports = middleware
 module.exports.convertParams = convertParams
 module.exports.convertUrl = convertUrl
 module.exports.convertBody = convertBody
 module.exports.getParamsList = getParamsList
+module.exports.convertHeaders = convertHeaders

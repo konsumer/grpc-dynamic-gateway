@@ -39,7 +39,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
 // load the proxy on / URL
-app.use('/', grpcGateway('api.proto', '0.0.0.0:5051'))
+app.use('/', grpcGateway(['api.proto'], '0.0.0.0:5051'))
 
 const port = process.env.PORT || 8080
 app.listen(port, () => {
@@ -82,7 +82,7 @@ const credentials = grpc.credentials.createSsl(
   fs.readFileSync(yourkey),
   fs.readFileSync(yourcert)
 )
-app.use('/', grpcGateway('api.proto', '0.0.0.0:5051', credentials))
+app.use('/', grpcGateway(['api.proto'], '0.0.0.0:5051', credentials))
 ```
 
 # swagger
