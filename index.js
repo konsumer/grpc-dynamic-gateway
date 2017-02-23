@@ -1,4 +1,4 @@
-const grpc = require('grpc')
+const requiredGrpc = require('grpc')
 const express = require('express')
 
 const supportedMethods = ['get', 'put', 'post', 'delete', 'patch'] // supported HTTP methods
@@ -12,7 +12,8 @@ const paramRegex = /{(\w+)}/g // regex to find gRPC params in url
  * @param  {string} include      Path to find all includes
  * @return {Function}            Middleware
  */
-const middleware = (protoFiles, grpcLocation, credentials, debug, include) => {
+const middleware = (protoFiles, grpcLocation, credentials, debug, include, grpc) => {
+  grpc = grpc || requiredGrpc
   credentials = credentials || grpc.credentials.createInsecure()
   const clients = {}
   const router = express.Router()
@@ -34,7 +35,7 @@ const middleware = (protoFiles, grpcLocation, credentials, debug, include) => {
                   }
                   router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
                     const params = convertParams(req, child.options[`(google.api.http).${httpMethod}`])
-                    const meta = convertHeaders(req.headers)
+                    const meta = convertHeaders(req.headers, grpc)
                     if (debug) {
                       console.log(`${pkg}.${svc}.${child.name}(${JSON.stringify(params)})`)
                     }
@@ -118,7 +119,8 @@ const getParamsList = (url) => {
  * @param  {object} headers Headers: {name: value}
  * @return {meta}           grpc meta object
  */
-const convertHeaders = (headers) => {
+const convertHeaders = (headers, grpc) => {
+  grpc = grpc || requiredGrpc
   headers = headers || {}
   const metadata = new grpc.Metadata()
   Object.keys(headers).forEach(h => { metadata.set(h, headers[h]) })
