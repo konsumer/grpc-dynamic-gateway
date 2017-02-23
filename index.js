@@ -4,8 +4,6 @@ const express = require('express')
 const supportedMethods = ['get', 'put', 'post', 'delete', 'patch'] // supported HTTP methods
 const paramRegex = /{(\w+)}/g // regex to find gRPC params in url
 
-const clients = {}
-
 /**
  * generate middleware to proxy to gRPC defined by proto files
  * @param  {string[]} protoFiles Filenames of protobuf-file
@@ -16,6 +14,7 @@ const clients = {}
  */
 const middleware = (protoFiles, grpcLocation, credentials, debug, include) => {
   credentials = credentials || grpc.credentials.createInsecure()
+  const clients = {}
   const router = express.Router()
   protoFiles.forEach(p => {
     const proto = include ? grpc.load({file: p, root: include}) : grpc.load(p)
