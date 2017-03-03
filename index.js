@@ -79,7 +79,7 @@ const convertParams = (req, url) => {
  */
 const convertUrl = (url) => (
   // TODO: PRIORITY:LOW - use types to generate regex for numbers & strings in params
-  url.replace(paramRegex, ':$1')
+  url.replace(paramRegex, ':$1?')
 )
 
 /**
