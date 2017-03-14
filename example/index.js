@@ -1,3 +1,5 @@
+'use strict'
+
 const grpc = require('grpc')
 const path = require('path')
 const Module = require('module')

@@ -1,3 +1,5 @@
+'use strict'
+
 const requiredGrpc = require('grpc')
 const express = require('express')
 
