@@ -62,7 +62,7 @@ const middleware = (protoFiles, grpcLocation, credentials, debug, include, grpc)
 }
 
 /**
- * Parse express request into params for grpc client
+ * Parse express request params & query into params for grpc client
  * @param  {Request} req Express request object
  * @param  {string} url  gRPC url field (ie "/v1/hi/{name}")
  * @return {Object}      params for gRPC client
@@ -70,7 +70,14 @@ const middleware = (protoFiles, grpcLocation, credentials, debug, include, grpc)
 const convertParams = (req, url) => {
   const gparams = getParamsList(url)
   const out = req.body
-  gparams.forEach(p => { out[p] = req.params[p] })
+  gparams.forEach(p => {
+    if (req.query && req.query[p]) {
+      out[p] = req.query[p]
+    }
+    if (req.params && req.params[p]) {
+      out[p] = req.params[p]
+    }
+  })
   return out
 }
 
