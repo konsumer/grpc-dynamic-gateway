@@ -6,6 +6,8 @@ const express = require('express')
 const supportedMethods = ['get', 'put', 'post', 'delete', 'patch'] // supported HTTP methods
 const paramRegex = /{(\w+)}/g // regex to find gRPC params in url
 
+const colors = require('colors')
+
 /**
  * generate middleware to proxy to gRPC defined by proto files
  * @param  {string[]} protoFiles Filenames of protobuf-file
@@ -33,23 +35,29 @@ const middleware = (protoFiles, grpcLocation, credentials, debug, include, grpc)
               supportedMethods.forEach(httpMethod => {
                 if (typeof child.options[`(google.api.http).${httpMethod}`] !== 'undefined') {
                   if (debug) {
-                    console.log(httpMethod.toUpperCase(), child.options[`(google.api.http).${httpMethod}`], ':', `${pkg}.${svc}.${child.name}(${child.requestName})`, '→', child.responseName)
+                    console.log(colors.green(httpMethod.toUpperCase()), colors.yellow(child.options[`(google.api.http).${httpMethod}`]), ':', colors.blue(`${pkg}.${svc}.${child.name}(${colors.white(child.requestName)})`), '→', child.responseName)
                   }
                   router[httpMethod](convertUrl(child.options[`(google.api.http).${httpMethod}`]), (req, res) => {
                     const params = convertParams(req, child.options[`(google.api.http).${httpMethod}`])
                     const meta = convertHeaders(req.headers, grpc)
                     if (debug) {
-                      console.log(`${pkg}.${svc}.${child.name}(${JSON.stringify(params)})`)
+                      console.log(colors.green(`${pkg}.${svc}.${child.name}`), `(${colors.blue(JSON.stringify(params))})`)
                     }
-                    clients[pkg][svc][child.name](params, meta, (err, ans) => {
-                      // TODO: PRIORITY:MEDIUM - improve error-handling
-                      // TODO: PRIORITY:HIGH - double-check JSON mapping is identical to grpc-gateway
-                      if (err) {
-                        console.error(err.message)
-                        return res.status(500).json({code: err.code, message: err.message})
-                      }
-                      res.json(convertBody(ans, child.options['(google.api.http).body'], child.options[`(google.api.http).${httpMethod}`]))
-                    })
+                    try {
+                      clients[pkg][svc][child.name](params, meta, (err, ans) => {
+                        // TODO: PRIORITY:MEDIUM - improve error-handling
+                        // TODO: PRIORITY:HIGH - double-check JSON mapping is identical to grpc-gateway
+                        if (err) {
+                          console.error(colors.red(`${svc}.${child.name}`, err.message))
+                          console.trace()
+                          return res.status(500).json({code: err.code, message: err.message})
+                        }
+                        res.json(convertBody(ans, child.options['(google.api.http).body'], child.options[`(google.api.http).${httpMethod}`]))
+                      })
+                    } catch (err) {
+                      console.error(colors.red(`${svc}.${child.name}: `, err.message))
+                      console.trace()
+                    }
                   })
                 }
               })
