@@ -36,6 +36,7 @@
     "colors": "^1.1.2",
     "express": "^4.14.0",
     "grpc": "^1.1.2",
+    "protocol-buffers-schema": "^3.3.1",
     "yargs": "^6.6.0"
   },
   "devDependencies": {
