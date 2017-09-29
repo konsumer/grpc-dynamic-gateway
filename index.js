@@ -19,7 +19,7 @@ const lowerFirstChar = str => str.charAt(0).toLowerCase() + str.slice(1)
  * @param  {string} include      Path to find all includes
  * @return {Function}            Middleware
  */
-const middleware = (protoFiles, grpcLocation, credentials=grpc.credentials.createInsecure(), debug=true, include, grpc=requiredGrpc) => {
+const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credentials.createInsecure(), debug = true, include, grpc = requiredGrpc) => {
   const router = express.Router()
   const clients = {}
   const protos = protoFiles.map(p => include ? grpc.load({file: p, root: include}) : grpc.load(p))
@@ -33,9 +33,9 @@ const middleware = (protoFiles, grpcLocation, credentials=grpc.credentials.creat
         const svc = s.name
         clients[pkg][svc] = new protos[si][pkg][svc](grpcLocation, credentials)
         s.methods.forEach(m => {
-          if (m.options['google.api.http']){
+          if (m.options['google.api.http']) {
             supportedMethods.forEach(httpMethod => {
-              if (m.options['google.api.http'][httpMethod]){
+              if (m.options['google.api.http'][httpMethod]) {
                 if (debug) console.log(colors.green(httpMethod.toUpperCase()), colors.blue(m.options['google.api.http'][httpMethod]))
                 router[httpMethod](convertUrl(m.options['google.api.http'][httpMethod]), (req, res) => {
                   const params = convertParams(req, m.options['google.api.http'][httpMethod])
