@@ -1,6 +1,6 @@
 {
   "name": "grpc-dynamic-gateway",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Like grpc-gateway, but written in node and dynamic.",
   "main": "index.js",
   "bin": {
