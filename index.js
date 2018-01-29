@@ -38,6 +38,7 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
     .forEach((sch, si) => {
       const pkg = sch.package
       clients[pkg] = clients[pkg] || {}
+      if(!sch.services){return;}
       sch.services.forEach(s => {
         const svc = s.name
         clients[pkg][svc] = new protos[si][pkg][svc](grpcLocation, credentials)
