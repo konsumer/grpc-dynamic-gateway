@@ -22,6 +22,15 @@ const lowerFirstChar = str => str.charAt(0).toLowerCase() + str.slice(1)
 const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credentials.createInsecure(), debug = true, include, grpc = requiredGrpc) => {
   const router = express.Router()
   const clients = {}
+  if(include.endsWith("/")) {
+    include = include.substring(0, include.length-1); // remove"/"
+  }
+  protoFiles = protoFiles.map(function (value, index, array) {
+    if(value.startsWith(include)){
+      value = value.substring(include.length + 1);
+      return value;
+    }
+  });
   const protos = protoFiles.map(p => include ? grpc.load({file: p, root: include}) : grpc.load(p))
   protoFiles
     .map(p => `${include}/${p}`)
