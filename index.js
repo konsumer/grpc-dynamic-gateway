@@ -22,26 +22,25 @@ const lowerFirstChar = str => str.charAt(0).toLowerCase() + str.slice(1)
 const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credentials.createInsecure(), debug = true, include, grpc = requiredGrpc) => {
   const router = express.Router()
   const clients = {}
-  if(include.endsWith("/")) {
-    include = include.substring(0, include.length-1); // remove"/"
+  if (include.endsWith("/")) {
+    include = include.substring(0, include.length - 1); // remove"/"
   }
   protoFiles = protoFiles.map(function (value, index, array) {
-    if(value.startsWith(include)){
+    if (value.startsWith(include)) {
       value = value.substring(include.length + 1);
-      return value;
     }
+    return value;
   });
-  const protos = protoFiles.map(p => include ? grpc.load({file: p, root: include}) : grpc.load(p))
+  const protos = protoFiles.map(p => include ? grpc.load({ file: p, root: include }) : grpc.load(p))
   protoFiles
     .map(p => `${include}/${p}`)
     .map(p => schema.parse(fs.readFileSync(p)))
     .forEach((sch, si) => {
       const pkg = sch.package
-      clients[pkg] = clients[pkg] || {}
-      if(!sch.services){return;}
+      if (!sch.services) { return; }
       sch.services.forEach(s => {
-        const svc = s.name
-        clients[pkg][svc] = new protos[si][pkg][svc](grpcLocation, credentials)
+        const svc = s.name;
+        getPkg(clients, pkg, true)[svc] = new (getPkg(protos[si], pkg, false))[svc](grpcLocation, credentials)
         s.methods.forEach(m => {
           if (m.options['google.api.http']) {
             supportedMethods.forEach(httpMethod => {
@@ -52,13 +51,13 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
                   const meta = convertHeaders(req.headers, grpc)
                   if (debug) console.log(colors.green(`${pkg}.${svc}.${m.name}`), `(${colors.blue(JSON.stringify(params))})`)
                   try {
-                    clients[pkg][svc][lowerFirstChar(m.name)](params, meta, (err, ans) => {
+                    getPkg(clients, pkg, false)[svc][lowerFirstChar(m.name)](params, meta, (err, ans) => {
                       // TODO: PRIORITY:MEDIUM - improve error-handling
                       // TODO: PRIORITY:HIGH - double-check JSON mapping is identical to grpc-gateway
                       if (err) {
                         console.error(colors.red(`${svc}.${m.name}`, err.message))
                         console.trace()
-                        return res.status(500).json({code: err.code, message: err.message})
+                        return res.status(500).json({ code: err.code, message: err.message })
                       }
                       res.json(convertBody(ans, m.options['google.api.http'].body, m.options['google.api.http'][httpMethod]))
                     })
@@ -74,6 +73,20 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
       })
     })
   return router
+}
+
+const getPkg = (client, pkg, create = false) => {
+  if (!((pkg || "").indexOf('.') != -1))
+    return client[pkg];
+  const ls = pkg.split('.');
+  let obj = client;
+  ls.forEach(function (name) {
+    if (create) {
+      obj[name] = obj[name] || {};
+    }
+    obj = obj[name];
+  })
+  return obj;
 }
 
 /**
