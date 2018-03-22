@@ -28,8 +28,8 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
   protoFiles = protoFiles.map(function (value, index, array) {
     if (value.startsWith(include)) {
       value = value.substring(include.length + 1);
-      return value;
     }
+    return value;
   });
   const protos = protoFiles.map(p => include ? grpc.load({ file: p, root: include }) : grpc.load(p))
   protoFiles
@@ -37,11 +37,10 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
     .map(p => schema.parse(fs.readFileSync(p)))
     .forEach((sch, si) => {
       const pkg = sch.package
-      clients[pkg] = clients[pkg] || {}
       if (!sch.services) { return; }
       sch.services.forEach(s => {
         const svc = s.name;
-        getPkg(clients, pkg, true)[svc] = new getPkg(protos[si], pkg, false)[svc](grpcLocation, credentials)
+        getPkg(clients, pkg, true)[svc] = new (getPkg(protos[si], pkg, false))[svc](grpcLocation, credentials)
         s.methods.forEach(m => {
           if (m.options['google.api.http']) {
             supportedMethods.forEach(httpMethod => {
@@ -77,7 +76,7 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
 }
 
 const getPkg = (client, pkg, create = false) => {
-  if (!(pkg || "").include('.'))
+  if (!((pkg || "").indexOf('.') != -1))
     return client[pkg];
   const ls = pkg.split('.');
   let obj = client;
