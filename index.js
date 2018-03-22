@@ -5,6 +5,7 @@ const express = require('express')
 const colors = require('colors')
 const fs = require('fs')
 const schema = require('protocol-buffers-schema')
+const urlmodule = require('url');
 
 const supportedMethods = ['get', 'put', 'post', 'delete', 'patch'] // supported HTTP methods
 const paramRegex = /{(\w+)}/g // regex to find gRPC params in url
@@ -96,7 +97,7 @@ const getPkg = (client, pkg, create = false) => {
  * @return {Object}      params for gRPC client
  */
 const convertParams = (req, url) => {
-  const gparams = getParamsList(url)
+  const gparams = getParamsList(req.url)
   const out = req.body
   gparams.forEach(p => {
     if (req.query && req.query[p]) {
@@ -147,6 +148,10 @@ const getParamsList = (url) => {
       paramRegex.lastIndex++
     }
     out.push(m[1])
+  }
+  let result = urlmodule.parse(url, true);
+  for (const key in result.query) {
+    out.push(key)
   }
   return out
 }
