@@ -37,12 +37,11 @@
     "express": "^4.16.3",
     "grpc": "^1.10.1",
     "json-colorizer": "^1.1.0",
-    "marked": "^0.3.9",
     "protocol-buffers-schema": "^3.3.2",
-    "yargs": "^6.6.0"
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "jest": "^18.1.0",
-    "release-it": "^2.9.0"
+    "jest": "^22.4.3",
+    "release-it": "^7.4.1"
   }
 }
