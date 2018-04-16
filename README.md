@@ -7,7 +7,7 @@ This will allow you to provide a REST-like JSON interface for your gRPC protobuf
 * Install with `npm i -g grpc-dynamic-gateway`
 * Start with `grpc-dynamic-gateway DEFINITION.proto`
 
-You can see an example project [here](https://github.com/konsumer/grpcnode/example) that shows how to use all the CLI tools, with no code other than your endpoint implementation.
+You can see an example project [here](https://github.com/konsumer/grpcnode/tree/master/example) that shows how to use all the CLI tools, with no code other than your endpoint implementation.
 
 
 # cli
