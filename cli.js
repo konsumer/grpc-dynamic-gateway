@@ -32,6 +32,10 @@ const argv = yargs.usage('Usage: $0 [options] DEFINITION.proto [DEFINITION2.prot
   .describe('mountpoint', 'URL to mount server on')
   .alias('mountpoint', 'm')
 
+  .boolean('quiet')
+  .describe('quiet', 'Suppress logs')
+  .alias('quiet', 'q')
+
   .argv
 
 if (!argv._.length) {
@@ -58,7 +62,7 @@ if (argv.ca || argv.key || argv.cert) {
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc, credentials, true, argv.include))
+app.use(argv.mountpoint, grpcGateway(argv._, argv.grpc, credentials, !argv.quiet, argv.include))
 app.listen(argv.port, () => {
   console.log(`Listening on http://0.0.0.0:${argv.port}, proxying to gRPC on ${argv.grpc}`)
 })

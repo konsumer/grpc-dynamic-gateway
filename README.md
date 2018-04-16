@@ -5,7 +5,7 @@ This will allow you to provide a REST-like JSON interface for your gRPC protobuf
 * Install with `npm i -g grpc-dynamic-gateway`
 * Start with `grpc-dynamic-gateway DEFINITION.proto`
 
-You can see an example project [here](https://github.com/konsumer/grpc-demo) that shows how to use all the CLI tools, with no code other than your endpoint implementation.
+You can see an example project [here](https://github.com/konsumer/grpcnode/example) that shows how to use all the CLI tools, with no code other than your endpoint implementation.
 
 
 # cli
@@ -17,12 +17,13 @@ Options:
   -?, --help, -h    Show help                                          [boolean]
   --port, -p        The port to serve your JSON proxy on         [default: 8080]
   --grpc, -g        The host & port to connect to, where your gprc-server is
-                    running                            [default: "0.0.0.0:5051"]
+                    running                         [default: "localhost:50051"]
   -I, --include     Path to resolve imports from
-  --ca              SSL CA cert
-  --key             SSL client key
-  --cert            SSL client certificate
+  --ca              SSL CA cert for gRPC
+  --key             SSL client key for gRPC
+  --cert            SSL client certificate for gRPC
   --mountpoint, -m  URL to mount server on                        [default: "/"]
+  --quiet, -q       Suppress logs                                      [boolean]
 ```
 
 # in code
