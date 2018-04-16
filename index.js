@@ -2,9 +2,10 @@
 
 const requiredGrpc = require('grpc')
 const express = require('express')
-const colors = require('colors')
+const colors = require('chalk')
 const fs = require('fs')
 const schema = require('protocol-buffers-schema')
+const colorize = require('json-colorizer')
 
 const supportedMethods = ['get', 'put', 'post', 'delete', 'patch'] // supported HTTP methods
 const paramRegex = /{(\w+)}/g // regex to find gRPC params in url
@@ -49,7 +50,11 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
                 router[httpMethod](convertUrl(m.options['google.api.http'][httpMethod]), (req, res) => {
                   const params = convertParams(req, m.options['google.api.http'][httpMethod])
                   const meta = convertHeaders(req.headers, grpc)
-                  if (debug) console.log(colors.green(`${pkg}.${svc}.${m.name}`), `(${colors.blue(JSON.stringify(params))})`)
+                  if (debug) {
+                    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+                    console.log(`GATEWAY: ${colors.yellow((new Date()).toISOString())} (${colors.cyan(ip)}): /${colors.blue(pkg.replace(/\./g, colors.white('.')))}.${colors.blue(svc)}/${colors.cyan(m.name)}(${colorize(params)})`)
+                  }
+
                   try {
                     getPkg(clients, pkg, false)[svc][lowerFirstChar(m.name)](params, meta, (err, ans) => {
                       // TODO: PRIORITY:MEDIUM - improve error-handling

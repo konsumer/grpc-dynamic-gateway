@@ -17,7 +17,7 @@ const argv = yargs.usage('Usage: $0 [options] DEFINITION.proto [DEFINITION2.prot
   .describe('port', 'The port to serve your JSON proxy on')
   .alias('port', 'p')
 
-  .default('grpc', process.env.GRPC_HOST || 'localhost:5051')
+  .default('grpc', process.env.GRPC_HOST || 'localhost:50051')
   .describe('grpc', 'The host & port to connect to, where your gprc-server is running')
   .alias('grpc', 'g')
 
