@@ -1,6 +1,6 @@
 # grpc-dynamic-gateway
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/konsumer/grpc-dynamic-gateway.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.org/konsumer/grpc-dynamic-gateway.svg?branch=master)](https://travis-ci.org/konsumer/grpc-dynamic-gateway) [![Greenkeeper badge](https://badges.greenkeeper.io/konsumer/grpc-dynamic-gateway.svg)](https://greenkeeper.io/)
 
 This will allow you to provide a REST-like JSON interface for your gRPC protobuf interface. [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) requires you to genrate a static version of your interface in go, then compile it. This will allow you to run a JSON proxy for your grpc server without generating/compiling.
 
