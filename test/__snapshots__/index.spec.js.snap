@@ -1,3 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`gRPC Dynamic Gateway convertBody() should handle {cool: true}, * 1`] = `
 Object {
   "cool": true,
