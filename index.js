@@ -1,5 +1,7 @@
 'use strict'
 
+// TODO: socket.io for streams
+
 const requiredGrpc = require('grpc')
 const express = require('express')
 const colors = require('chalk')
@@ -23,24 +25,24 @@ const lowerFirstChar = str => str.charAt(0).toLowerCase() + str.slice(1)
 const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credentials.createInsecure(), debug = true, include, grpc = requiredGrpc) => {
   const router = express.Router()
   const clients = {}
-  if (include.endsWith("/")) {
-    include = include.substring(0, include.length - 1); // remove"/"
+  if (include.endsWith('/')) {
+    include = include.substring(0, include.length - 1) // remove"/"
   }
   protoFiles = protoFiles.map(function (value, index, array) {
     if (value.startsWith(include)) {
-      value = value.substring(include.length + 1);
+      value = value.substring(include.length + 1)
     }
-    return value;
-  });
+    return value
+  })
   const protos = protoFiles.map(p => include ? grpc.load({ file: p, root: include }) : grpc.load(p))
   protoFiles
     .map(p => `${include}/${p}`)
     .map(p => schema.parse(fs.readFileSync(p)))
     .forEach((sch, si) => {
       const pkg = sch.package
-      if (!sch.services) { return; }
+      if (!sch.services) { return }
       sch.services.forEach(s => {
-        const svc = s.name;
+        const svc = s.name
         getPkg(clients, pkg, true)[svc] = new (getPkg(protos[si], pkg, false))[svc](grpcLocation, credentials)
         s.methods.forEach(m => {
           if (m.options['google.api.http']) {
@@ -81,17 +83,16 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
 }
 
 const getPkg = (client, pkg, create = false) => {
-  if (!((pkg || "").indexOf('.') != -1))
-    return client[pkg];
-  const ls = pkg.split('.');
-  let obj = client;
+  if (!((pkg || '').indexOf('.') != -1)) { return client[pkg] }
+  const ls = pkg.split('.')
+  let obj = client
   ls.forEach(function (name) {
     if (create) {
-      obj[name] = obj[name] || {};
+      obj[name] = obj[name] || {}
     }
-    obj = obj[name];
+    obj = obj[name]
   })
-  return obj;
+  return obj
 }
 
 /**
@@ -121,7 +122,7 @@ const convertParams = (req, url) => {
  */
 const convertUrl = (url) => (
   // TODO: PRIORITY:LOW - use types to generate regex for numbers & strings in params
-  url.replace(paramRegex, ':$1?')
+  url.replace(paramRegex, ':$1')
 )
 
 /**
