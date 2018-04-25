@@ -83,7 +83,14 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
 }
 
 const getPkg = (client, pkg, create = false) => {
-  if (!((pkg || '').indexOf('.') != -1)) { return client[pkg] }
+  if (!((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) { 
+    return client[pkg] 
+  }
+
+  if (((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) { 
+    return client[pkg] 
+  }
+  
   const ls = pkg.split('.')
   let obj = client
   ls.forEach(function (name) {
@@ -92,6 +99,7 @@ const getPkg = (client, pkg, create = false) => {
     }
     obj = obj[name]
   })
+  console.log("obj is", obj)
   return obj
 }
 
