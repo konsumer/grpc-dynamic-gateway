@@ -99,7 +99,6 @@ const getPkg = (client, pkg, create = false) => {
     }
     obj = obj[name]
   })
-  console.log("obj is", obj)
   return obj
 }
 
