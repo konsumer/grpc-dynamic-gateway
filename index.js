@@ -3,6 +3,7 @@
 // TODO: socket.io for streams
 
 const requiredGrpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader');
 const express = require('express')
 const colors = require('chalk')
 const fs = require('fs')
@@ -34,7 +35,12 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
     }
     return value
   })
-  const protos = protoFiles.map(p => include ? grpc.load({ file: p, root: include }) : grpc.load(p))
+  
+  const protos = protoFiles.map(p => {
+    const packageDefinition = include ? protoLoader.loadSync(p, {includeDirs: [include]}) : protoLoader.loadSync(p);
+    return grpc.loadPackageDefinition(packageDefinition);
+  });
+
   protoFiles
     .map(p => `${include}/${p}`)
     .map(p => schema.parse(fs.readFileSync(p)))
