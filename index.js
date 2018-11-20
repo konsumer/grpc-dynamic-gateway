@@ -3,7 +3,7 @@
 // TODO: socket.io for streams
 
 const requiredGrpc = require('grpc')
-const protoLoader = require('@grpc/proto-loader');
+const protoLoader = require('@grpc/proto-loader')
 const express = require('express')
 const colors = require('chalk')
 const fs = require('fs')
@@ -35,11 +35,11 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
     }
     return value
   })
-  
+
   const protos = protoFiles.map(p => {
-    const packageDefinition = include ? protoLoader.loadSync(p, {includeDirs: [include]}) : protoLoader.loadSync(p);
-    return grpc.loadPackageDefinition(packageDefinition);
-  });
+    const packageDefinition = include ? protoLoader.loadSync(p, { includeDirs: [include] }) : protoLoader.loadSync(p)
+    return grpc.loadPackageDefinition(packageDefinition)
+  })
 
   protoFiles
     .map(p => `${include}/${p}`)
@@ -89,14 +89,14 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
 }
 
 const getPkg = (client, pkg, create = false) => {
-  if (!((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) { 
-    return client[pkg] 
+  if (!((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) {
+    return client[pkg]
   }
 
-  if (((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) { 
-    return client[pkg] 
+  if (((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) {
+    return client[pkg]
   }
-  
+
   const ls = pkg.split('.')
   let obj = client
   ls.forEach(function (name) {
