@@ -42,6 +42,6 @@
   },
   "devDependencies": {
     "jest": "^22.4.3",
-    "release-it": "^7.4.1"
+    "release-it": "^8.0.0"
   }
 }
