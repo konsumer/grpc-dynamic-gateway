@@ -37,7 +37,7 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
   })
 
   const protos = protoFiles.map(p => {
-    const packageDefinition = include ? protoLoader.loadSync(p, { includeDirs: [include] }) : protoLoader.loadSync(p)
+    const packageDefinition = include ? protoLoader.loadSync(p, { includeDirs: Array.isArray(include) ? include : [include] }) : protoLoader.loadSync(p)
     return grpc.loadPackageDefinition(packageDefinition)
   })
 
