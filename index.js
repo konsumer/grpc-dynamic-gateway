@@ -23,7 +23,7 @@ const lowerFirstChar = str => str.charAt(0).toLowerCase() + str.slice(1)
  * @param  {string} include      Path to find all includes
  * @return {Function}            Middleware
  */
-const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credentials.createInsecure(), debug = true, include, grpc = requiredGrpc) => {
+const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credentials.createInsecure(), debug = true, include = process.cwd(), grpc = requiredGrpc) => {
   const router = express.Router()
   const clients = {}
   if (include.endsWith('/')) {
