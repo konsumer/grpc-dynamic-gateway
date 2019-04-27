@@ -42,7 +42,7 @@
     "yargs": "^13.1.0"
   },
   "devDependencies": {
-    "release-it": "^8.0.0",
+    "release-it": "^9.0.0",
     "jest": "23.6.0"
   }
 }
