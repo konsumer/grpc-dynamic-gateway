@@ -39,7 +39,7 @@
     "json-colorizer": "^2.0.0",
     "@grpc/proto-loader": "0.3.0",
     "protocol-buffers-schema": "^3.3.2",
-    "yargs": "^12.0.1"
+    "yargs": "^13.1.0"
   },
   "devDependencies": {
     "release-it": "^8.0.0",
