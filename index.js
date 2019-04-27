@@ -115,7 +115,7 @@ const getPkg = (client, pkg, create = false) => {
  * @return {Object}      params for gRPC client
  */
 const convertParams = (req, url) => {
-  const gparams = getParamsList(url)
+  const gparams = getParamsList(req, url)
   const out = req.body
   gparams.forEach(p => {
     if (req.query && req.query[p]) {
@@ -158,8 +158,11 @@ const convertBody = (value, bodyMap) => {
  * @param  {string} url gRPC URL
  * @return {string[]}   Array of params
  */
-const getParamsList = (url) => {
-  const out = []
+const getParamsList = (req, url) => {
+  let out = []
+  if (req.query) {
+    out = Object.keys(req.query)
+  }
   let m
   while ((m = paramRegex.exec(url)) !== null) {
     if (m.index === paramRegex.lastIndex) {
