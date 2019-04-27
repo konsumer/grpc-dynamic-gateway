@@ -105,7 +105,7 @@ There is one required port, and a volume that will make it easier:
 - `/api.proto` - your proto file
 - `8080` - the exposed port
 
-There is also an optional environment variable: `GRPC_HOST` which should resolve to your grpc sever (default `0.0.0.0:5051`)
+There is also an optional environment variable: `GRPC_HOST` which should resolve to your grpc server (default `0.0.0.0:5051`)
 
 So to run it, try this:
 
