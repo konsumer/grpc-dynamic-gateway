@@ -1,3 +1,13 @@
-language: node_js
-node_js:
-  - "node"
+dist: trusty
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker build -t grpc-dynamic-gateway .
+      - docker images
+      - docker tag grpc-dynamic-gateway $DOCKER_USERNAME/grpc-dynamic-gateway
+      - docker push $DOCKER_USERNAME/grpc-dynamic-gateway
+    - stage: test
+      script: docker run --rm $DOCKER_USERNAME/grpc-dynamic-gateway npm test
