@@ -89,11 +89,11 @@ const middleware = (protoFiles, grpcLocation, credentials = requiredGrpc.credent
 }
 
 const getPkg = (client, pkg, create = false) => {
-  if (!((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) {
+  if (!((pkg || '').indexOf('.') !== -1) && client[pkg] !== undefined) {
     return client[pkg]
   }
 
-  if (((pkg || '').indexOf('.') != -1) && client[pkg] !== undefined) {
+  if (((pkg || '').indexOf('.') !== -1) && client[pkg] !== undefined) {
     return client[pkg]
   }
 
