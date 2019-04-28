@@ -71,9 +71,11 @@ describe('gRPC Dynamic Gateway', () => {
     })
   })
 
-  // describe('convertHeaders()', () => {
-  //   it('should convert a Authorize token in header to a metadata object', () => {
-  //     expect(convertHeaders({'Authorize': 'Bearer DUMMY_TOKEN'})).toMatchSnapshot()
-  //   })
-  // })
+  describe('convertHeaders()', () => {
+    it('should convert a Authorize token in header to a metadata object', () => {
+      const result = convertHeaders({ 'Authorize': 'Bearer DUMMY_TOKEN' })
+      expect(result.constructor.name).toBe('Metadata')
+      expect(result._internal_repr.authorize).toContain('Bearer DUMMY_TOKEN')
+    })
+  })
 })
