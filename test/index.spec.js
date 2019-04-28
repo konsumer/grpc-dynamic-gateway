@@ -15,40 +15,65 @@ describe('gRPC Dynamic Gateway', () => {
           name: 'Cool'
         }
       }
-      expect(convertParams(req, '/v1/hi/{name}')).toMatchSnapshot()
+      const result = convertParams(req, '/v1/hi/{name}')
+      expect(result.name).toBe('Cool')
+      expect(result.v1).toBe(true)
+      expect(result.v2).toBe(false)
     })
   })
 
   describe('convertUrl()', () => {
     it('should correctly convert /v1/hi/{name} into express URL', () => {
-      expect(convertUrl('/v1/hi/{name}')).toMatchSnapshot()
+      const result = convertUrl('/v1/hi/{name}')
+      expect(result).toBe('/v1/hi/:name')
     })
+
     it('should correctly convert /{version}/hi/{name}/{cool} into express URL', () => {
-      expect(convertUrl('/{version}/hi/{name}/{cool}')).toMatchSnapshot()
+      const result = convertUrl('/{version}/hi/{name}/{cool}')
+      expect(result).toBe('/:version/hi/:name/:cool')
     })
   })
 
   describe('convertBody()', () => {
     it('should handle {cool: true}, *', () => {
-      expect(convertBody({cool: true}, '*')).toMatchSnapshot()
+      const result = convertBody({ cool: true }, '*')
+      expect(result.cool).toBe(true)
     })
+
     it('should handle {cool: true}, cool', () => {
-      expect(convertBody({cool: true}, 'cool')).toMatchSnapshot()
+      const result = convertBody({ cool: true }, 'cool')
+      expect(result).toBe(true)
     })
   })
 
   describe('getParamsList()', () => {
-    it('should find params in /v1/hi/{name}', () => {
-      expect(getParamsList('/v1/hi/{name}')).toMatchSnapshot()
+    it('should find params in /v1/hi/{name}?tester=Cool', () => {
+      const req = {
+        query: {
+          tester: 'Cool'
+        }
+      }
+      const result = getParamsList(req, '/v1/hi/{name}')
+      expect(result).toContain('name')
+      expect(result).toContain('tester')
     })
-    it('should find params in /{version}/hi/{name}/{cool}', () => {
-      expect(getParamsList('/{version}/hi/{name}/{cool}')).toMatchSnapshot()
+
+    it('should find params in /{version}/hi/{name}/{cool}?tester=Cool', () => {
+      const req = {
+        query: {
+          tester: 'Cool'
+        }
+      }
+      const result = getParamsList(req, '/{version}/hi/{name}/{cool}')
+      expect(result).toContain('name')
+      expect(result).toContain('cool')
+      expect(result).toContain('tester')
     })
   })
 
-  describe('convertHeaders()', () => {
-    it('should convert a Authorize token in header to a metadata object', () => {
-      expect(convertHeaders({'Authorize': 'Bearer DUMMY_TOKEN'})).toMatchSnapshot()
-    })
-  })
+  // describe('convertHeaders()', () => {
+  //   it('should convert a Authorize token in header to a metadata object', () => {
+  //     expect(convertHeaders({'Authorize': 'Bearer DUMMY_TOKEN'})).toMatchSnapshot()
+  //   })
+  // })
 })

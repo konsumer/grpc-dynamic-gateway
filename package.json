@@ -7,7 +7,7 @@
     "grpc-dynamic-gateway": "cli.js"
   },
   "scripts": {
-    "test": "jest --notify --coverage",
+    "test": "jest",
     "test:update": "npm test -- --updateSnapshot",
     "test:watch": "npm test -- --watch",
     "release": "release-it -p -n"
@@ -42,7 +42,7 @@
     "yargs": "^13.1.0"
   },
   "devDependencies": {
-    "release-it": "^9.0.0",
-    "jest": "23.6.0"
+    "jest": "^24.7.1",
+    "release-it": "^9.0.0"
   }
 }
