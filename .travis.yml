@@ -10,4 +10,4 @@ jobs:
       - docker tag grpc-dynamic-gateway $DOCKER_USERNAME/grpc-dynamic-gateway
       - docker push $DOCKER_USERNAME/grpc-dynamic-gateway
     - stage: test
-      script: docker run --rm $DOCKER_USERNAME/grpc-dynamic-gateway npm test
+      script: docker run --rm -it --entrypoint=/usr/local/bin/npm konsumer/grpc-dynamic-gateway test
