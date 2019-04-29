@@ -43,6 +43,6 @@
   },
   "devDependencies": {
     "jest": "^24.7.1",
-    "release-it": "^9.0.0"
+    "release-it": "^10.4.5"
   }
 }
