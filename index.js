@@ -116,16 +116,37 @@ const getPkg = (client, pkg, create = false) => {
  */
 const convertParams = (req, url) => {
   const gparams = getParamsList(req, url)
-  const out = req.body
+  const flat = req.body
   gparams.forEach(p => {
     if (req.query && req.query[p]) {
-      out[p] = req.query[p]
+      flat[p] = req.query[p]
     }
     if (req.params && req.params[p]) {
-      out[p] = req.params[p]
+      flat[p] = req.params[p]
     }
   })
-  return out
+  const tree = {};
+  Object.keys(flat).forEach(k => {
+    putParamInObjectHierarchy(k.split('.'), tree, flat[k])
+  });
+  return tree;
+}
+
+/**
+ * Help put the URL Params in the proper object structure
+ * @param {Array} keyArray The param name split by '.' 
+ * @param {*} targetObj The current selected branch of the object tree
+ * @param {*} value The param value
+ */
+const putParamInObjectHierarchy = (keyArray, targetObj, value) => {
+  if (keyArray.length > 1) {
+    const k = keyArray.shift();
+    targetObj[k] = targetObj[k] || {}
+    putParamInObjectHierarchy(keyArray, targetObj[k], value)
+  }
+  else {
+    targetObj[keyArray[0]] = value
+  }
 }
 
 /**
