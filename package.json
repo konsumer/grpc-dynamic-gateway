@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/konsumer/grpc-dynamic-gateway#readme",
   "dependencies": {
-    "@grpc/proto-loader": "0.3.0",
+    "@grpc/proto-loader": "^0.5.2",
     "body-parser": "^1.18.2",
     "chalk": "^2.3.2",
     "express": "^4.16.3",
