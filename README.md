@@ -92,12 +92,12 @@ const credentials = grpc.credentials.createSsl(
 app.use('/', grpcGateway(['api.proto'], '0.0.0.0:5051', credentials))
 ```
 
-# swagger
+# OpenAPI (a.k.a Swagger)
 
-[Protoc](https://github.com/google/protobuf) can generate a swagger description of your RPC endpoints, if you have [protoc-gen-swagger](https://github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger) installed:
+[Protoc](https://github.com/google/protobuf) can generate a OpenAPI description of your RPC endpoints, if you have [protoc-gen-openapiv2](https://github.com/grpc-ecosystem/grpc-gateway/tree/master/protoc-gen-openapiv2) installed:
 
 ```
-protoc DEFINITION.proto --swagger_out=logtostderr=true:.
+protoc DEFINITION.proto --openapiv2_out=logtostderr=true:.
 ```
 
 # docker
